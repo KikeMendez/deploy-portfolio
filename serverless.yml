@@ -1,0 +1,24 @@
+service: portfolioDeploy
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: eu-west-1
+  memorySize: 1800
+  timeout: 20 
+
+package:
+  include:
+    - handler.py
+  exclude:
+    - .git/**
+    - .vscode/**
+    - .serverless/**
+    - Pipfile.lock
+    - Pipfile
+
+functions:
+  deploy-portfolio:
+    handler: handler.lambda_handler
+    role: arn:aws:iam::284351314223:role/service-role/buildPortfolioLambdaRole
+    name: ${self:provider.stage}-deploy-portfolio
