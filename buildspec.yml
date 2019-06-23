@@ -9,7 +9,8 @@ phases:
     commands:
       - echo nothing to do here, this needs to be improved
   post_build:
-    - sls deploy
+    commands:
+      - sls deploy
 artifacts:
   files:
     - '**/*'
