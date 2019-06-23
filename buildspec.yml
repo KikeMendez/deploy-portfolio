@@ -5,12 +5,9 @@ phases:
       nodejs: 10
     commands:
       - npm install -g serverless
-  build:
-    commands:
-      - echo nothing to do here, this needs to be improved
   post_build:
     commands:
       - sls deploy --region eu-west-1 --verbose
-artifacts:
-  files:
-    - '**/*'
+# artifacts:
+#   files:
+#     - '**/*'
