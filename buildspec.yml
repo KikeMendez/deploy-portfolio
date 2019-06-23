@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+    commands:
+      - npm install -g serverless
+  build:
+    commands:
+      - echo nothing to do here, this needs to be improved
+  post_build:
+    - sls deploy
+artifacts:
+  files:
+    - '**/*'
