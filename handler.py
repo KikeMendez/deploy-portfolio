@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         portfolio_zip = io.BytesIO()
         build_portfolio_bucket.download_fileobj(location['objectKey'], portfolio_zip)
 
-        # grab objects from memory and set mimetype and then upload it to deployment bucket
+        # grab objects from memory set mimetype for each object and then upload them to deployment bucket
         with zipfile.ZipFile(portfolio_zip) as myzip:
             for key in myzip.namelist():
                 obj = myzip.open(key)
