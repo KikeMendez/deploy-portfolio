@@ -8,17 +8,19 @@ import logging
 
 def lambda_handler(event, context):
 
+    # Set logging object
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.info(event)
 
+    # get codebuild object
     codepipeline = boto3.client('codepipeline')
 
-    # Get sns object
+    # get sns object
     sns = boto3.resource('sns')
     topic = sns.Topic('arn:aws:sns:eu-west-1:284351314223:NotifyPortfolioBuild')
 
-    # portfolio build bucket
+    # portfolio build bucket to use if the deployment is trigger manually
     location: {
         "bucketName": 'kike-portfolio-deployment',
         "objectKey": 'portfolio'
@@ -38,7 +40,9 @@ def lambda_handler(event, context):
                 if artifact['name'] == 'BuildArtifact':
                     location = artifact['location']['s3Location']
 
+        # get s3 object
         s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
+
         portfolio_bucket = s3.Bucket('kike-portfolio')
         build_portfolio_bucket = s3.Bucket(location['bucketName'])
 
@@ -46,6 +50,7 @@ def lambda_handler(event, context):
         portfolio_zip = io.BytesIO()
         build_portfolio_bucket.download_fileobj(location['objectKey'], portfolio_zip)
 
+        # grab objects from memory and set mimetype and then upload it to deployment bucket
         with zipfile.ZipFile(portfolio_zip) as myzip:
             for key in myzip.namelist():
                 obj = myzip.open(key)
@@ -60,18 +65,17 @@ def lambda_handler(event, context):
         topic.publish(Message='Success Portfolio has been deployed')
 
         if job:
-            # codepipeline = boto3.client('codepipeline')
             codepipeline.put_job_success_result(jobId=job['id'])
 
     except:
         print("Error")
         topic.publish(Message='Failed!! Portfolio has not been deployed')
         if job:
-            # codepipeline = boto3.client('codepipeline')
             codepipeline.put_job_failure_result(jobId=job['id'])
         raise
+
     logger.info(response)
-    # TODO implement
+
     return {
         'statusCode': 200,
         'body': json.dumps(response)
