@@ -35,6 +35,7 @@ def lambda_handler(event, context):
         if job:
             print('codepipeline event')
             logger.info(job)
+
             for artifact in job['data']['inputArtifacts']:
                 print(artifact)
                 if artifact['name'] == 'BuildArtifact':
@@ -50,7 +51,7 @@ def lambda_handler(event, context):
         portfolio_zip = io.BytesIO()
         build_portfolio_bucket.download_fileobj(location['objectKey'], portfolio_zip)
 
-        # grab objects from memory set mimetype for each object and then upload them to deployment bucket
+        # grab objects from memory set mimetype for each object and then upload them to portfolio bucket
         with zipfile.ZipFile(portfolio_zip) as myzip:
             for key in myzip.namelist():
                 obj = myzip.open(key)
@@ -59,6 +60,7 @@ def lambda_handler(event, context):
                 if obj_type is not None:
                     portfolio_bucket.upload_fileobj(obj,key,
                         ExtraArgs={'ContentType': obj_type })
+
                     portfolio_bucket.Object(key).Acl().put(ACL='public-read')
 
         print("Job compleated")
